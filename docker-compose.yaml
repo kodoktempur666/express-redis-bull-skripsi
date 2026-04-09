@@ -10,6 +10,8 @@ services:
       DB_USER: postgres
       DB_PASSWORD: psql
       DB_NAME: mydb
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - monitoring
 
