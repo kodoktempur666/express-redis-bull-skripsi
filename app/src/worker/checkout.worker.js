@@ -11,12 +11,15 @@ const worker = new Worker(
       `INSERT INTO checkouts (name, amount, item)
        VALUES ($1, $2, $3)
        RETURNING *`,
-      [name, amount, item]
+      [name, amount, item],
     );
 
     return result.rows[0];
   },
-  { connection: redis, concurrency: 10 }
+  {
+    connection: redis,
+    concurrency: 10,
+  },
 );
 
 worker.on("completed", (job) => {
