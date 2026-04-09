@@ -4,7 +4,6 @@ services:
     container_name: express_opti_app
     ports:
       - "3020:3020"
-    network_mode: "host"
     environment:
       PORT: 3020
       DB_HOST: 127.0.0.1
