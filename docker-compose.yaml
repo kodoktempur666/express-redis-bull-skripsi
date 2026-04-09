@@ -4,18 +4,11 @@ services:
     container_name: express_opti_app
     ports:
       - "3020:3020"
+    network_mode: "host"
     environment:
       PORT: 3020
-      DB_HOST: host.docker.internal
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: psql
       DB_NAME: mydb
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    networks:
-      - monitoring
-
- 
-networks:
-  monitoring:
-    external: true
