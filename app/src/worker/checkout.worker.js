@@ -1,31 +1,33 @@
 import { Worker } from "bullmq";
-import pool from "../config/db.js";
 import redis from "../config/redis.js";
+import client from "../config/grpc.js";
 
 const worker = new Worker(
   "checkoutQueue",
-  async (job) => {
-    const { name, amount, item } = job.data;
+  async job => {
 
-    const result = await pool.query(
-      `INSERT INTO checkouts (name, amount, item)
-       VALUES ($1, $2, $3)
-       RETURNING *`,
-      [name, amount, item],
-    );
+    return new Promise((resolve, reject) => {
 
-    return result.rows[0];
+      client.CreateCheckout(job.data, (err, res) => {
+
+        if (err) reject(err);
+        else resolve(res);
+
+      });
+
+    });
+
   },
   {
     connection: redis,
-    concurrency: 10,
-  },
+    concurrency: 10
+  }
 );
 
-worker.on("completed", (job) => {
-  console.log(`Job ${job.id} completed`);
+worker.on("completed", () => {
+  console.log("Job completed");
 });
 
-worker.on("failed", (job, err) => {
-  console.error(`Job ${job.id} failed:`, err.message);
+worker.on("failed", err => {
+  console.error(err);
 });

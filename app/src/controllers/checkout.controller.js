@@ -15,65 +15,48 @@ const handleResponse = (res, status, message, data = null) => {
   });
 };
 
-// ✅ CREATE → QUEUE (BullMQ)
-export const createCheckouts = async (req, res, next) => {
-  const { name, amount, item } = req.body;
 
-  try {
-    const job = await checkoutQueue.add("createCheckout", {
-      name,
-      amount,
-      item,
-    });
+export const createCheckouts = async (req, res) => {
+  await checkoutQueue.add("createCheckout", req.body);
 
-    handleResponse(res, 202, "Checkout is being processed", {
-      jobId: job.id,
-    });
-  } catch (err) {
-    next(err);
-  }
+  return res.status(202).json({
+    success: true,
+    message: "Checkout queued"
+  });
 };
 
-// ✅ GET → CACHE
+
 export const getCheckouts = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const cacheKey = `checkout:${id}`;
-
-    const cached = await connection.get(cacheKey);
-    if (cached) {
-      return handleResponse(res, 200, "From cache", JSON.parse(cached));
-    }
 
     const data = await getCheckout(id);
 
-    if (data) {
-      await connection.set(cacheKey, JSON.stringify(data), "EX", 60);
-    }
-
-    handleResponse(res, 200, "From database", data);
+    handleResponse(res, 200, "Checkout got successfully", data);
   } catch (err) {
     next(err);
   }
 };
 
-// ✅ PUT → DIRECT + INVALIDATE CACHE
+
 export const editCheckouts = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, amount, item } = req.body;
 
-    const updatedCheckout = await editCheckout(id, name, amount, item);
+    const updatedCheckout = await editCheckout(
+      id,
+      name,
+      amount,
+      item
+    );
 
-    await connection.del(`checkout:${id}`);
-
-    handleResponse(res, 200, "Checkout updated", updatedCheckout);
+    handleResponse(res, 200, "Checkout edited successfully", updatedCheckout);
   } catch (error) {
     next(error);
   }
 };
 
-// ✅ PATCH → DIRECT + INVALIDATE CACHE
 export const patchCheckouts = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -86,9 +69,7 @@ export const patchCheckouts = async (req, res, next) => {
       item ?? null
     );
 
-    await connection.del(`checkout:${id}`);
-
-    handleResponse(res, 200, "Checkout patched", patchedCheckout);
+    handleResponse(res, 200, "Checkout patched successfully", patchedCheckout);
   } catch (error) {
     next(error);
   }

@@ -1,4 +1,18 @@
 services:
+  grpc-server:
+    build: ./grpc-server
+    image: grpc-server:latest
+    container_name: grpc_server
+    ports:
+      - "50051:50051"
+    network_mode: "host"
+    environment:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: psql
+      DB_NAME: mydb
+
   app:
     build: ./app
     container_name: express_opti_app
