@@ -4,7 +4,7 @@ import {
 } from "../models/checkout.model.js";
 
 import checkoutQueue from "../queue/checkout.queue.js";
-import connection from "../config/redis.js";
+import redis from "../config/redis.js";
 
 const handleResponse = (res, status, message, data = null) => {
   res.status(status).json({
@@ -30,7 +30,7 @@ export const getCheckouts = async (req, res, next) => {
     const { id } = req.params;
     const cacheKey = `checkout:${id}`;
 
-    const cached = await connection.get(cacheKey);
+    const cached = await redis.get(cacheKey);
     if (cached) {
       return handleResponse(res, 200, "From cache", JSON.parse(cached));
     }
@@ -38,7 +38,7 @@ export const getCheckouts = async (req, res, next) => {
     const data = await getCheckout(id);
 
     if (data) {
-      await connection.set(cacheKey, JSON.stringify(data), "EX", 60);
+      await redis.set(cacheKey, JSON.stringify(data), "EX", 60);
     }
 
     handleResponse(res, 200, "From database", data);
