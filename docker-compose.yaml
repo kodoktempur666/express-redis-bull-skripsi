@@ -33,12 +33,12 @@ services:
     command: node src/worker/checkoutPost.worker.js
 
   worker-edit:
-    build: .
+    build: ./app
     container_name: worker_edit
     command: node src/worker/checkoutEdit.worker.js
   
 
   worker-patch:
-    build: .
+    build: ./app
     container_name: worker_patch
     command: node src/worker/checkoutPatch.worker.js
