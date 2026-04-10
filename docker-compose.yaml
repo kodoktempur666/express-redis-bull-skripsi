@@ -30,15 +30,18 @@ services:
   worker-post:
     build: ./app
     container_name: worker_post
+    network_mode: "host"
     command: node src/worker/checkoutPost.worker.js
 
   worker-put:
     build: ./app
     container_name: worker_put
+    network_mode: "host"
     command: node src/worker/checkoutPut.worker.js
   
 
   worker-patch:
     build: ./app
     container_name: worker_patch
+    network_mode: "host"
     command: node src/worker/checkoutPatch.worker.js
