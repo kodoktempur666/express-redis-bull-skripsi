@@ -32,10 +32,10 @@ services:
     container_name: worker_post
     command: node src/worker/checkoutPost.worker.js
 
-  worker-edit:
+  worker-put:
     build: ./app
-    container_name: worker_edit
-    command: node src/worker/checkoutEdit.worker.js
+    container_name: worker_put
+    command: node src/worker/checkoutPut.worker.js
   
 
   worker-patch:
