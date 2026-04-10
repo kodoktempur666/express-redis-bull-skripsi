@@ -17,7 +17,7 @@ const handleResponse = (res, status, message, data = null) => {
 
 
 export const createCheckouts = async (req, res) => {
-  await checkoutQueue.add("createCheckout", req.body);
+  await checkoutQueue.add("create", req.body);
 
   return res.status(202).json({
     success: true,
@@ -29,48 +29,54 @@ export const createCheckouts = async (req, res) => {
 export const getCheckouts = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const cacheKey = `checkout:${id}`;
+
+    const cached = await connection.get(cacheKey);
+    if (cached) {
+      return handleResponse(res, 200, "From cache", JSON.parse(cached));
+    }
 
     const data = await getCheckout(id);
 
-    handleResponse(res, 200, "Checkout got successfully", data);
+    if (data) {
+      await connection.set(cacheKey, JSON.stringify(data), "EX", 60);
+    }
+
+    handleResponse(res, 200, "From database", data);
   } catch (err) {
     next(err);
   }
 };
 
 
-export const editCheckouts = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const { name, amount, item } = req.body;
+export const editCheckout = async (req, res) => {
+  const { id } = req.params;
 
-    const updatedCheckout = await editCheckout(
-      id,
-      name,
-      amount,
-      item
-    );
+  await checkoutQueue.add("put", {
+    ...req.body,
+    id
+  });
 
-    handleResponse(res, 200, "Checkout edited successfully", updatedCheckout);
-  } catch (error) {
-    next(error);
-  }
+  await redis.del(`checkout:${id}`);
+
+  return res.status(202).json({
+    success: true,
+    message: "Checkout update queued"
+  });
 };
 
-export const patchCheckouts = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const { name, amount, item } = req.body;
+export const patchCheckout = async (req, res) => {
+  const { id } = req.params;
 
-    const patchedCheckout = await patchCheckout(
-      id,
-      name ?? null,
-      amount ?? null,
-      item ?? null
-    );
+  await checkoutQueue.add("patch", {
+    ...req.body,
+    id
+  });
 
-    handleResponse(res, 200, "Checkout patched successfully", patchedCheckout);
-  } catch (error) {
-    next(error);
-  }
+  await redis.del(`checkout:${id}`);
+
+  return res.status(202).json({
+    success: true,
+    message: "Checkout patch queued"
+  });
 };
