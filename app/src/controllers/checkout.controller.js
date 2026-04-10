@@ -3,7 +3,7 @@ import {
 
 } from "../models/checkout.model.js";
 
-import checkoutQueue from "../queue/checkout.queue.js";
+import { createQueue,editQueue,patchQueue } from "../queue/checkout.queue.js";
 import redis from "../config/redis.js";
 
 const handleResponse = (res, status, message, data = null) => {
@@ -16,11 +16,11 @@ const handleResponse = (res, status, message, data = null) => {
 
 
 export const createCheckouts = async (req, res) => {
-  await checkoutQueue.add("create", req.body);
+  await createQueue.add("create", req.body);
 
-  return res.status(202).json({
+  res.status(202).json({
     success: true,
-    message: "Checkout queued"
+    message: "Create checkout queued",
   });
 };
 
@@ -51,12 +51,10 @@ export const getCheckouts = async (req, res, next) => {
 export const editCheckouts = async (req, res) => {
   const { id } = req.params;
 
-  await checkoutQueue.add("put", {
+  await editQueue.add("put", {
     ...req.body,
     id
   });
-
-  await redis.del(`checkout:${id}`);
 
   return res.status(202).json({
     success: true,
@@ -67,7 +65,7 @@ export const editCheckouts = async (req, res) => {
 export const patchCheckouts = async (req, res) => {
   const { id } = req.params;
 
-  await checkoutQueue.add("patch", {
+  await patchQueue.add("patch", {
     ...req.body,
     id
   });

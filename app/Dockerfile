@@ -1,12 +1,25 @@
+# FROM node:24
+
+# WORKDIR /app
+
+# COPY package.json ./
+# RUN npm install
+
+# COPY . .
+
+# EXPOSE 3020
+
+# CMD ["sh", "-c", "node src/index.js & node src/worker/checkout.worker.js"]
+
 FROM node:24
 
 WORKDIR /app
 
-COPY package.json ./
+COPY package.json package-lock.json* ./
 RUN npm install
 
 COPY . .
 
 EXPOSE 3020
 
-CMD ["sh", "-c", "node src/index.js & node src/worker/checkout.worker.js"]
+CMD ["node", "src/index.js"]

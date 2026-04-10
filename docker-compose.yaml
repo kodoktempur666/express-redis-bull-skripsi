@@ -26,3 +26,19 @@ services:
       DB_USER: postgres
       DB_PASSWORD: psql
       DB_NAME: mydb
+
+  worker-post:
+    build: ./app
+    container_name: worker_post
+    command: node src/worker/checkoutPost.worker.js
+
+  worker-edit:
+    build: .
+    container_name: worker_edit
+    command: node src/worker/checkoutEdit.worker.js
+  
+
+  worker-patch:
+    build: .
+    container_name: worker_patch
+    command: node src/worker/checkoutPatch.worker.js
