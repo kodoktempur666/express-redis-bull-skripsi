@@ -48,7 +48,7 @@ export const getCheckouts = async (req, res, next) => {
 };
 
 
-export const editCheckout = async (req, res) => {
+export const editCheckouts = async (req, res) => {
   const { id } = req.params;
 
   await checkoutQueue.add("put", {
@@ -64,7 +64,7 @@ export const editCheckout = async (req, res) => {
   });
 };
 
-export const patchCheckout = async (req, res) => {
+export const patchCheckouts = async (req, res) => {
   const { id } = req.params;
 
   await checkoutQueue.add("patch", {
