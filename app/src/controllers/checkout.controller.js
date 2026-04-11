@@ -56,6 +56,9 @@ export const editCheckouts = async (req, res) => {
     id
   });
 
+  await redis.del(`checkout:${id}`);
+
+
   return res.status(202).json({
     success: true,
     message: "Checkout update queued"
